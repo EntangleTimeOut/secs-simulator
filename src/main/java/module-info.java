@@ -1,4 +1,7 @@
 module com.shimizukenta.secssimulator {
+	requires java.desktop;
+	exports com.shimizukenta.secssimulator;
+	exports com.shimizukenta.secssimulator.macro;
 	exports com.shimizukenta.secssimulator.cli;
 	exports com.shimizukenta.secssimulator.gui;
 	exports com.shimizukenta.secs;

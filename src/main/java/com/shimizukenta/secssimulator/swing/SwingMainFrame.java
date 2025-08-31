@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
@@ -27,6 +29,13 @@ import com.shimizukenta.secssimulator.macro.MacroWorker;
 public class SwingMainFrame extends JFrame {
 	
 	private static final long serialVersionUID = 4147107959994828227L;
+
+	private static final DateTimeFormatter LOG_TS_FMT = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+
+	private static File defaultLogFile() {
+		final String name = "log-" + LocalDateTime.now().format(LOG_TS_FMT) + ".txt";
+		return new File(name);
+	}
 	
 	private final JDesktopPane desktopPane = new JDesktopPane();
 	private final Collection<AbstractSwingInternalFrame> inners = new ArrayList<>();
@@ -35,6 +44,7 @@ public class SwingMainFrame extends JFrame {
 	private final JFileChooser loadConfigFileChooser = new JFileChooser();
 	private final JFileChooser saveConfigFileChooser = new JFileChooser();
 	private final JFileChooser loggingFileChooser = new JFileChooser();
+	private final JFileChooser exportViewerFileChooser = new JFileChooser();
 	private final JFileChooser addSmlFileChooser = new JFileChooser();
 	private final JFileChooser loadSmlFileChooser = new JFileChooser();
 	private final JFileChooser saveSmlFileChooser = new JFileChooser();
@@ -75,8 +85,24 @@ public class SwingMainFrame extends JFrame {
 		}
 		
 		this.saveConfigFileChooser.setDialogTitle("Save config file");
+		{
+			final File baseDir = this.loggingFileChooser.getCurrentDirectory();
+			this.loadConfigFileChooser.setCurrentDirectory(baseDir);
+			this.saveConfigFileChooser.setCurrentDirectory(baseDir);
+			this.addSmlFileChooser.setCurrentDirectory(baseDir);
+			this.loadSmlFileChooser.setCurrentDirectory(baseDir);
+			this.saveSmlFileChooser.setCurrentDirectory(baseDir);
+			this.addMacroRecipeFileChooser.setCurrentDirectory(baseDir);
+		}
 		
 		this.loggingFileChooser.setDialogTitle("Start Logging to file");
+		this.exportViewerFileChooser.setDialogTitle("Export Viewer Logs");
+		{
+			final String userDir = System.getProperty("user.dir", ".");
+			final File baseDir = new File(userDir);
+			this.loggingFileChooser.setCurrentDirectory(baseDir);
+			this.exportViewerFileChooser.setCurrentDirectory(baseDir);
+		}
 		
 		this.addSmlFileChooser.setDialogTitle("Add SML from files");
 		this.addSmlFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -251,7 +277,7 @@ public class SwingMainFrame extends JFrame {
 	}
 	
 	protected void showLoggingDialog() {
-		
+		this.loggingFileChooser.setSelectedFile(defaultLogFile());
 		switch ( this.loggingFileChooser.showSaveDialog(this) ) {
 		case JFileChooser.APPROVE_OPTION: {
 			File file = this.loggingFileChooser.getSelectedFile();
@@ -268,6 +294,27 @@ public class SwingMainFrame extends JFrame {
 		case JFileChooser.CANCEL_OPTION:
 		case JFileChooser.ERROR_OPTION:
 		default: {
+			/* Nothing */
+		}
+		}
+	}
+
+	protected void showExportViewerLogsDialog() {
+		this.exportViewerFileChooser.setSelectedFile(defaultLogFile());
+		switch ( this.exportViewerFileChooser.showSaveDialog(this) ) {
+		case JFileChooser.APPROVE_OPTION: {
+			File file = this.exportViewerFileChooser.getSelectedFile();
+			try {
+				this.viewFrame.exportViewerLogs(file.toPath());
+			}
+			catch ( IOException e ) {
+				simulator().putFailure(e);
+			}
+			break;
+		}
+		case JFileChooser.CANCEL_OPTION:
+		case JFileChooser.ERROR_OPTION:
+		default :{
 			/* Nothing */
 		}
 		}

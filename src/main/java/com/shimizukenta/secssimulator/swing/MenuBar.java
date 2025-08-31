@@ -36,6 +36,9 @@ public class MenuBar extends JMenuBar {
 						item("Save Config...", ev -> {
 							simulator().showSaveConfigDialog();
 						}),
+						item("Export Viewer Logs...", ev -> {
+							simulator().showExportViewerLogsDialog();
+						}),
 						separator(),
 						itemLogging,
 						separator(),

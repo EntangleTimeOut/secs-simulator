@@ -15,7 +15,7 @@ public class EntryDialog extends AbstractSwingDialog {
 	public EntryDialog(Frame owner, SwingSecsSimulator simm) {
 		super(simm, owner, "Welcome", true);
 		
-		this.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		
 		this.setLayout(defaultGridLayout(2, 1));
 		

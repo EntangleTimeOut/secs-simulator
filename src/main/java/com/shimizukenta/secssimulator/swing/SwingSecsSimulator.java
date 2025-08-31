@@ -4,6 +4,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import com.shimizukenta.secs.SecsCommunicator;
 import com.shimizukenta.secs.SecsMessage;
 import com.shimizukenta.secs.sml.SmlMessage;
 import com.shimizukenta.secs.sml.SmlParseException;
+import com.shimizukenta.secssimulator.SmlAliasPair;
 import com.shimizukenta.secssimulator.SecsSimulatorException;
 import com.shimizukenta.secssimulator.SecsSimulatorSendException;
 import com.shimizukenta.secssimulator.SecsSimulatorWaitReplyException;
@@ -186,6 +188,10 @@ public class SwingSecsSimulator extends AbstractGuiSecsSimulator {
 	protected void showLoggingDialog() {
 		this.frame.showLoggingDialog();
 	}
+
+	protected void showExportViewerLogsDialog() {
+		this.frame.showExportViewerLogsDialog();
+	}
 	
 	protected void showAddSmlDialog() {
 		this.frame.showAddSmlDialog();
@@ -264,6 +270,34 @@ public class SwingSecsSimulator extends AbstractGuiSecsSimulator {
 				
 				for ( String v : map.getOrDefault("--dark", Collections.emptyList()) ) {
 					config.darkMode(Boolean.parseBoolean(v));
+				}
+
+				for ( String v : map.getOrDefault("--auto-add", Collections.emptyList()) ) {
+					try {
+						final Path p = Paths.get(v);
+						final java.util.List<Path> targets = new java.util.ArrayList<>();
+						if (Files.isDirectory(p)) {
+							try (java.util.stream.Stream<Path> walk = Files.walk(p)) {
+								walk.filter(Files::isRegularFile)
+									.filter(f -> f.getFileName().toString().toLowerCase().endsWith(".sml"))
+									.forEach(targets::add);
+							}
+						} else {
+							targets.add(p);
+						}
+
+						for (Path f : targets) {
+							try {
+								config.smlAliasPairPool().add(SmlAliasPair.fromFile(f));
+							} catch ( SmlParseException | IOException ex ) {
+								System.err.println("Skip SML (parse failed): " + f.toAbsolutePath());
+								ex.printStackTrace();
+							}
+						}
+					}
+					catch ( InvalidPathException ex ) {
+						System.err.println("Invalid --auto-add path: " + v);
+					}
 				}
 			}
 			
