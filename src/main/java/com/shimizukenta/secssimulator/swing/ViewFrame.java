@@ -2,6 +2,7 @@ package com.shimizukenta.secssimulator.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -44,10 +45,10 @@ public class ViewFrame extends AbstractSwingInternalFrame {
 
 	private volatile FilterMode filterMode = FilterMode.ALL;
 
-	// Match broader subjects to include SECS, SECS1, Block variants
-	private static final String SUBJECT_SEND = "Sended SECS";
-	private static final String SUBJECT_RECV = "Receive SECS";
-	private static final String SUBJECT_TRYSEND = "Try-Send SECS";
+	// Match broader subjects to include HSMS, SECS, SECS1, Block variants
+	private static final String[] SUBJECTS_SEND = {"Sended HSMS", "Sended SECS"};
+	private static final String[] SUBJECTS_RECV = {"Receive HSMS", "Receive SECS"};
+	private static final String[] SUBJECTS_TRYSEND = {"Try-Send HSMS", "Try-Send SECS"};
 	
 	public ViewFrame(SwingSecsSimulator parent) {
 		super(parent, "Viewer", true, false, true, true);
@@ -191,13 +192,29 @@ public class ViewFrame extends AbstractSwingInternalFrame {
 	private Style styleHost;
 	private Style styleOther;
 
-	private static Category classify(SecsSimulatorLog log) {
+	private Category classify(SecsSimulatorLog log) {
 		final String subj = log.subject();
-		if ( subj.contains(SUBJECT_SEND) || subj.contains(SUBJECT_TRYSEND) ) {
-			return Category.EQUIPMENT;
-		}
-		if ( subj.contains(SUBJECT_RECV) ) {
-			return Category.HOST;
+		boolean isEquip = false;
+		try {
+			isEquip = config().hsmsSsCommunicatorConfig().isEquip().booleanValue();
+		} catch (Exception ignore) {}
+
+		if ( isEquip ) {
+			if ( Arrays.stream(SUBJECTS_SEND).anyMatch(subj::contains)
+			  || Arrays.stream(SUBJECTS_TRYSEND).anyMatch(subj::contains) ) {
+				return Category.EQUIPMENT;
+			}
+			if ( Arrays.stream(SUBJECTS_RECV).anyMatch(subj::contains) ) {
+				return Category.HOST;
+			}
+		} else {
+			if ( Arrays.stream(SUBJECTS_SEND).anyMatch(subj::contains)
+			  || Arrays.stream(SUBJECTS_TRYSEND).anyMatch(subj::contains) ) {
+				return Category.HOST;
+			}
+			if ( Arrays.stream(SUBJECTS_RECV).anyMatch(subj::contains) ) {
+				return Category.EQUIPMENT;
+			}
 		}
 		return Category.OTHER;
 	}

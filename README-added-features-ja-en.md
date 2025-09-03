@@ -1,6 +1,6 @@
 # 追加機能まとめ / Added Features (Swing SECS Simulator)
 
-日付 / Date: 2025-08-31
+日付 / Date: 2025-08-31  // Update 2025-09-03 
 
 ---
 
@@ -21,6 +21,7 @@
 - 色分け表示: Equipment=緑、Host=青、その他=標準色。
 - SECS-I を含む送受（メッセージ/ブロック）も分類・色分け・フィルタ対象に含めました。
 - レイアウト調整: ボタンや切り替えが欠けないように配置を修正。
+- HSMS対応、初期設定画面でEquipmentとHostの切り替えと連動しました。
 
 ### 3) 起動オプションの拡張
 - `--auto-add <path>`
@@ -59,6 +60,7 @@ The following features and improvements have been added to this Swing-based SECS
 - Color coding: Equipment=green, Host=blue, Others=default.
 - SECS-I traffic (messages/blocks) is included in classification, coloring, and filtering.
 - Layout adjustments to ensure all controls are visible without clipping.
+- HSMS support, linked to switching between Equipment and Host on the initial setting screen.
 
 ### 3) Startup option extension
 - `--auto-add <path>`
